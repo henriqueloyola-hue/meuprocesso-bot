@@ -20,12 +20,24 @@ import seeu
 import ia
 import whatsapp
 
+import base64
+import tempfile
+
 load_dotenv()
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
-CERT_PFX_PATH = os.environ["CERT_PFX_PATH"]
 CERT_PASSWORD = os.environ["CERT_PASSWORD"]
+
+# Suporte a certificado via base64 (Railway) ou path local
+_cert_b64 = os.environ.get("CERT_PFX_BASE64", "")
+if _cert_b64:
+    _tmp = tempfile.NamedTemporaryFile(suffix=".pfx", delete=False)
+    _tmp.write(base64.b64decode(_cert_b64))
+    _tmp.close()
+    CERT_PFX_PATH = _tmp.name
+else:
+    CERT_PFX_PATH = os.environ["CERT_PFX_PATH"]
 
 db = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -123,7 +135,7 @@ def processar_processo(page, processo: dict, conhecidas: set[str]) -> int:
 
 
 def main():
-    print(f"=== Bot Meu Processo — {date.today()} ===")
+    print(f"=== Bot Meu Prazo — {date.today()} ===")
 
     processos = buscar_processos_ativos()
     print(f"{len(processos)} processo(s) ativo(s) encontrado(s)")
