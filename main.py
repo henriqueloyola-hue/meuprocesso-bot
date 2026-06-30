@@ -22,6 +22,7 @@ import whatsapp
 
 import base64
 import tempfile
+import re
 
 load_dotenv()
 
@@ -31,11 +32,13 @@ CERT_PASSWORD = os.environ["CERT_PASSWORD"]
 
 # Suporte a certificado via base64 (Railway) ou path local
 _cert_b64 = os.environ.get("CERT_PFX_BASE64", "")
+_cert_tmp_path = None
 if _cert_b64:
     _tmp = tempfile.NamedTemporaryFile(suffix=".pfx", delete=False)
     _tmp.write(base64.b64decode(_cert_b64))
     _tmp.close()
     CERT_PFX_PATH = _tmp.name
+    _cert_tmp_path = _tmp.name
 else:
     CERT_PFX_PATH = os.environ["CERT_PFX_PATH"]
 
@@ -117,7 +120,8 @@ def processar_processo(page, processo: dict, conhecidas: set[str]) -> int:
             msg = whatsapp.montar_alerta_perigo(
                 nome_cliente, numero, mov["titulo"], mov["descricao_popular"]
             )
-            enviado = whatsapp.enviar_mensagem(whatsapp_cliente.replace(r"\D", ""), msg)
+            numero_limpo = re.sub(r"\D", "", whatsapp_cliente)
+            enviado = whatsapp.enviar_mensagem(numero_limpo, msg)
             registrar_notificacao(cliente_id, mov_id, "alerta", msg)
             print(f"  🚨 Alerta WhatsApp {'enviado' if enviado else 'registrado (WA não configurado)'}")
 
@@ -183,6 +187,12 @@ def main():
         context.close()
 
     print(f"\n✅ Concluído — {total_novas} movimentação(ões) nova(s) salva(s)")
+
+    if _cert_tmp_path:
+        try:
+            os.unlink(_cert_tmp_path)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
