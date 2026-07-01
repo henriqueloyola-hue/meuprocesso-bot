@@ -35,7 +35,9 @@ _cert_b64 = os.environ.get("CERT_PFX_BASE64", "")
 _cert_tmp_path = None
 if _cert_b64:
     _tmp = tempfile.NamedTemporaryFile(suffix=".pfx", delete=False)
-    _tmp.write(base64.b64decode(_cert_b64))
+    _cert_b64_clean = _cert_b64.strip().replace('\n', '').replace('\r', '').replace(' ', '')
+    _padding = (4 - len(_cert_b64_clean) % 4) % 4
+    _tmp.write(base64.b64decode(_cert_b64_clean + '=' * _padding))
     _tmp.close()
     CERT_PFX_PATH = _tmp.name
     _cert_tmp_path = _tmp.name
