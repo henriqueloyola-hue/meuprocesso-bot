@@ -30,7 +30,7 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 CERT_PASSWORD = os.environ["CERT_PASSWORD"]
 
-# Suporte a certificado via base64 (Railway) ou path local
+# Suporte a certificado via base64, path env ou arquivo no repo
 _cert_b64 = os.environ.get("CERT_PFX_BASE64", "")
 _cert_tmp_path = None
 if _cert_b64:
@@ -41,6 +41,8 @@ if _cert_b64:
     _tmp.close()
     CERT_PFX_PATH = _tmp.name
     _cert_tmp_path = _tmp.name
+elif os.path.exists(os.path.join(os.path.dirname(__file__), "cert.pfx")):
+    CERT_PFX_PATH = os.path.join(os.path.dirname(__file__), "cert.pfx")
 else:
     CERT_PFX_PATH = os.environ["CERT_PFX_PATH"]
 
