@@ -150,6 +150,10 @@ def main():
 
     total_novas = 0
 
+    # Remove variáveis de proxy que o Railway injeta automaticamente
+    for _var in ["HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"]:
+        os.environ.pop(_var, None)
+
     with sync_playwright() as p:
         # Contexto com certificado A1 para autenticação mútua TLS
         context = p.chromium.launch_persistent_context(
