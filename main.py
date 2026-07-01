@@ -160,7 +160,7 @@ def main():
                 "pfxPath": CERT_PFX_PATH,
                 "password": CERT_PASSWORD,
             }],
-            args=["--no-sandbox", "--disable-setuid-sandbox"],
+            args=["--no-sandbox", "--disable-setuid-sandbox", "--no-proxy-server"],
         )
 
         page = context.new_page()
